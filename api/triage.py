@@ -30,7 +30,12 @@ async def triage(request: Request):
             )
             resp.raise_for_status()
             data = resp.json()
-            return {"respuesta": data.get("respuesta", "Sin respuesta del agente")}
+            return {
+                "respuesta": data.get("response")
+                or data.get("respuesta")
+                or data.get("output")
+                or "Sin respuesta del agente"
+            }
         except httpx.HTTPStatusError as e:
             return JSONResponse(
                 {"error": f"n8n respondió {e.response.status_code}"}, status_code=502
