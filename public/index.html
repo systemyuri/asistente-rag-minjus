@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asistente RAG - MINJUSDH</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .chat-container {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+      }
+      .chat-header {
+        background: #003366;
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        text-align: center;
+      }
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .message {
+        padding: 10px 15px;
+        border-radius: 10px;
+        max-width: 80%;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+      .user-message {
+        background: #003366;
+        color: white;
+        align-self: flex-end;
+      }
+      .bot-message {
+        background: #e9ecef;
+        color: #333;
+        align-self: flex-start;
+      }
+      .chat-input {
+        display: flex;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+      }
+      .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        outline: none;
+      }
+      .chat-input button {
+        padding: 10px 20px;
+        background: #003366;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+      .chat-input button:hover {
+        background: #002244;
+      }
+      .loading {
+        color: #666;
+        font-style: italic;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h3>Asistente de Lineamientos - MINJUSDH</h3>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="message bot-message">
+          Hola, soy tu asistente de arquitectura. ¿En qué puedo ayudarte?
+        </div>
+      </div>
+      <div class="chat-input">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Escribe tu pregunta aquí..."
+          onkeypress="if (event.key === 'Enter') enviarMensaje();"
+        />
+        <button onclick="enviarMensaje()">Enviar</button>
+      </div>
+    </div>
+
+    <script>
+      // REEMPLAZA ESTA URL CON TU TEST URL DEL WEBHOOK
+      //const WEBHOOK_URL = 'https://testeryuri.app.n8n.cloud/webhook/chat';
+      const WEBHOOK_URL = "/api/triage";
+
+      async function enviarMensaje() {
+        const input = document.getElementById("user-input");
+        const boton = document.querySelector("button"); // Selecciona el botón de enviar
+        const mensaje = input.value.trim();
+        if (!mensaje) return;
+
+        // Mostrar mensaje del usuario
+        agregarMensaje(mensaje, "user-message");
+        input.value = "";
+
+        // Mostrar mensaje de "Pensando..." y guardar su referencia
+        const mensajeLoading = agregarMensaje(
+          "Pensando...",
+          "bot-message loading",
+        );
+
+        // DESACTIVAR botón e input mientras se procesa
+        input.disabled = true;
+        boton.disabled = true;
+        boton.textContent = "Esperando..."; // Cambiar el texto del botón (opcional)
+
+        try {
+          const response = await fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ mensaje: mensaje }),
+          });
+
+          const data = await response.json();
+
+          // Reemplazar el "Pensando..." con la respuesta real
+          const respuesta =
+            data.response || data.output || data.text || JSON.stringify(data);
+          mensajeLoading.textContent = respuesta;
+          mensajeLoading.classList.remove("loading");
+        } catch (error) {
+          // Si hay error, reemplazar el "Pensando..." con el mensaje de error
+          mensajeLoading.textContent =
+            "Error al conectar con el servidor. Verifica que el Webhook esté publicado.";
+          mensajeLoading.classList.remove("loading");
+        } finally {
+          // VOLVER A ACTIVAR botón e input SIEMPRE (haya éxito o error)
+          input.disabled = false;
+          boton.disabled = false;
+          boton.textContent = "Enviar"; // Restaurar el texto del botón
+          input.focus(); // Poner el cursor en el input para escribir de nuevo
+        }
+      }
+
+      function agregarMensaje(texto, clase) {
+        const messagesDiv = document.getElementById("chat-messages");
+        const nuevoMensaje = document.createElement("div");
+        nuevoMensaje.className = `message ${clase}`;
+        nuevoMensaje.textContent = texto;
+        messagesDiv.appendChild(nuevoMensaje);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return nuevoMensaje; // <--- Esto es nuevo
+      }
+    </script>
+  </body>
+</html>
