@@ -147,7 +147,7 @@
 
           // Reemplazar el "Pensando..." con la respuesta real
           const respuesta =
-            data.response || data.output || data.text || JSON.stringify(data);
+            data.respuesta || data.error || "Sin respuesta del agente";
           mensajeLoading.textContent = respuesta;
           mensajeLoading.classList.remove("loading");
         } catch (error) {
