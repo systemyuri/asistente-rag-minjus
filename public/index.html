@@ -4,21 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Asistente RAG - MINJUSDH</title>
+
+    <!-- Librería para dar formato bonito al texto (Markdown) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
       /* =========================================
-         1. NUEVO FONDO MODERNO (Gradiente)
+         1. ESTILOS INSTITUCIONALES (MINJUSDH)
          ========================================= */
+      :root {
+        --rojo-minjus: #c8102e; /* Rojo exacto de la imagen */
+        --gris-fondo: #f2f2f2; /* Gris de la pantalla */
+        --gris-texto: #444444; /* Gris oscuro para textos */
+      }
+
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        /* Fondo con gradiente sutil que combina con el azul institucional */
-        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+        background-color: var(--gris-fondo);
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
-        transition: all 0.3s ease; /* Suaviza la transición al maximizar */
       }
 
       /* =========================================
@@ -26,182 +33,166 @@
          ========================================= */
       .chat-container {
         width: 100%;
-        max-width: 700px; /* Un poco más ancho para pantallas grandes */
+        max-width: 800px; /* Un poco más ancho para parecerse a un portal */
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra más elegante */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
-        height: 85vh;
-        overflow: hidden; /* Para que el header respete el border-radius */
+        height: 90vh;
+        border-top: 5px solid var(--rojo-minjus); /* Línea roja superior */
         transition: all 0.3s ease;
       }
 
-      /* =========================================
-         3. CLASE PARA MAXIMIZAR EL CHAT
-         ========================================= */
+      /* Modo Maximizado */
       .chat-container.maximizado {
         max-width: 100%;
-        height: 100vh; /* Ocupa toda la altura */
-        border-radius: 0; /* Quita los bordes redondeados */
-        margin: 0;
-      }
-      body.maximizado-body {
-        padding: 0; /* Quita cualquier margen del body */
+        height: 100vh;
       }
 
       /* =========================================
-         4. CABECERA CON BOTÓN DE MAXIMIZAR
+         3. CABECERA (Estilo de la imagen)
          ========================================= */
       .chat-header {
-        background: #003366;
-        color: white;
-        padding: 15px 20px;
-        text-align: center;
+        background: white;
+        padding: 15px 25px;
         display: flex;
-        justify-content: space-between; /* Separa el título del botón */
         align-items: center;
-      }
-      .chat-header h3 {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 500;
+        justify-content: space-between;
+        border-bottom: 2px solid var(--gris-fondo);
       }
 
-      /* Botón de maximizar (Icono de flechas) */
-      .btn-maximizar {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
+      /* Simulamos el logo institucional con CSS */
+      .logo-institucional {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .logo-escudo {
+        width: 45px;
+        height: 45px;
+        background-color: var(--rojo-minjus);
+        border-radius: 50%; /* Simula el escudo */
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: white;
+        font-weight: bold;
+        font-size: 10px;
+      }
+
+      .titulo-principal {
+        color: var(--rojo-minjus);
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0;
+        text-transform: uppercase;
+      }
+
+      .btn-maximizar {
+        background: transparent;
+        border: 1px solid var(--rojo-minjus);
+        color: var(--rojo-minjus);
         cursor: pointer;
         padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 1.2rem;
-        transition: background 0.2s;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: all 0.2s;
       }
       .btn-maximizar:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--rojo-minjus);
+        color: white;
       }
 
       /* =========================================
-         5. MENSAJES Y ÁREA DE CHAT
+         4. ÁREA DE MENSAJES
          ========================================= */
       .chat-messages {
         flex: 1;
-        padding: 20px;
+        padding: 25px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        background-color: #f8f9fa; /* Fondo gris muy claro para el área de chat */
+        gap: 15px;
+        background-color: #fafafa;
       }
+
       .message {
-        padding: 12px 16px;
-        border-radius: 12px;
+        padding: 15px 20px;
+        border-radius: 8px;
         max-width: 85%;
-        line-height: 1.5;
+        line-height: 1.6;
         font-size: 15px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
-      .user-message {
-        background: #003366;
-        color: white;
-        align-self: flex-end;
-        border-bottom-right-radius: 4px;
-      }
+
+      /* Mensaje del Bot (Estilo tarjeta de la imagen) */
       .bot-message {
         background: white;
-        color: #333;
+        color: var(--gris-texto);
         align-self: flex-start;
-        border-bottom-left-radius: 4px;
         border: 1px solid #e0e0e0;
+        border-left: 4px solid var(--rojo-minjus); /* Detalle rojo a la izquierda */
       }
+
+      /* Mensaje del Usuario */
+      .user-message {
+        background: var(--rojo-minjus);
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 0;
+      }
+
+      /* Texto de "Cargando" */
       .loading {
-        color: #666;
+        color: #888;
         font-style: italic;
-        opacity: 0.7;
       }
 
       /* =========================================
-         6. ÁREA DE ENTRADA (Input y Botón)
+         5. ÁREA DE ENTRADA (Input)
          ========================================= */
       .chat-input {
         display: flex;
-        padding: 15px;
-        border-top: 1px solid #e0e0e0;
+        padding: 20px;
+        border-top: 1px solid #ddd;
         background: white;
       }
+
       .chat-input input {
         flex: 1;
-        padding: 12px;
+        padding: 12px 15px;
         border: 1px solid #ccc;
-        border-radius: 8px;
+        border-radius: 4px;
         outline: none;
         font-size: 15px;
         transition: border 0.2s;
       }
+
       .chat-input input:focus {
-        border-color: #003366;
+        border-color: var(--rojo-minjus);
       }
+
       .chat-input button {
-        padding: 12px 24px;
-        background: #003366;
+        padding: 12px 25px;
+        background: var(--rojo-minjus);
         color: white;
         border: none;
-        border-radius: 8px;
+        border-radius: 4px;
         margin-left: 10px;
         cursor: pointer;
         font-weight: bold;
+        font-size: 15px;
         transition: background 0.2s;
       }
+
       .chat-input button:hover {
-        background: #002244;
-      }
-      .chat-input button:disabled {
-        background: #99aab5;
-        cursor: not-allowed;
+        background: #a00d25; /* Rojo más oscuro */
       }
 
-      /* Estilos para el formato Markdown del bot */
-      .bot-message {
-        line-height: 1.6;
-      }
-      .bot-message p {
-        margin: 0 0 10px 0; /* Espacio entre párrafos */
-      }
-      .bot-message p:last-child {
-        margin-bottom: 0;
-      }
-      .bot-message ul,
-      .bot-message ol {
-        margin: 5px 0 10px 20px; /* Sangría para listas */
-        padding: 0;
-      }
-      .bot-message li {
-        margin-bottom: 5px;
-      }
-      .bot-message strong {
-        color: #003366; /* Resalta las negritas en azul institucional */
-        font-weight: 600;
-      }
-
-      /* Estilo para las citas [Documento] */
-      .cita-fuente {
-        display: inline-block;
-        background-color: #e6f0fa;
-        color: #003366;
-        font-size: 0.85em;
-        font-weight: bold;
-        padding: 2px 8px;
-        border-radius: 4px;
-        margin-top: 8px;
-        border-left: 3px solid #003366;
-      }
-
-      /* --- ESTILOS PARA EL FORMATO MARKDOWN --- */
-      .bot-message {
-        line-height: 1.6;
-      }
+      /* =========================================
+         6. FORMATO DE TEXTO (Markdown y Citas)
+         ========================================= */
       .bot-message p {
         margin: 0 0 10px 0;
       }
@@ -210,40 +201,42 @@
       }
       .bot-message ul,
       .bot-message ol {
-        margin: 8px 0 12px 20px; /* Sangría para listas */
+        margin: 5px 0 10px 20px;
         padding: 0;
       }
       .bot-message li {
-        margin-bottom: 6px;
+        margin-bottom: 5px;
       }
       .bot-message strong {
-        color: #003366; /* Resalta las negritas en azul */
+        color: var(--rojo-minjus);
         font-weight: 700;
       }
 
       /* Estilo para las citas [Documento] */
       .cita-fuente {
         display: inline-block;
-        background-color: #e6f0fa;
-        color: #003366;
+        background-color: #fdf2f2; /* Fondo rojizo muy claro */
+        color: var(--rojo-minjus);
         font-size: 0.85em;
         font-weight: bold;
         padding: 3px 8px;
         border-radius: 4px;
         margin-top: 8px;
-        border-left: 3px solid #003366;
+        border: 1px solid #f5c2c7;
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
     <div class="chat-container" id="chat-container">
-      <!-- CABECERA MODIFICADA -->
+      <!-- CABECERA INSTITUCIONAL -->
       <div class="chat-header">
-        <h3>Asistente de Lineamientos - MINJUSDH</h3>
+        <div class="logo-institucional">
+          <!-- Simulación del escudo -->
+          <div class="logo-escudo">PERÚ</div>
+          <h1 class="titulo-principal">Asistente Virtual de Lineamientos</h1>
+        </div>
         <button
           class="btn-maximizar"
-          id="btn-maximizar"
           onclick="toggleMaximizar()"
           title="Pantalla completa"
         >
@@ -251,17 +244,20 @@
         </button>
       </div>
 
+      <!-- ÁREA DE MENSAJES -->
       <div class="chat-messages" id="chat-messages">
         <div class="message bot-message">
-          Hola, soy tu asistente de arquitectura. ¿En qué puedo ayudarte?
+          Bienvenido al Asistente de Lineamientos del MINJUSDH. <br />¿En qué
+          puedo ayudarte hoy?
         </div>
       </div>
 
+      <!-- ÁREA DE ENTRADA -->
       <div class="chat-input">
         <input
           type="text"
           id="user-input"
-          placeholder="Escribe tu pregunta aquí..."
+          placeholder="Escriba su consulta sobre arquitectura de software..."
           onkeypress="if (event.key === 'Enter') enviarMensaje();"
         />
         <button id="btn-enviar" onclick="enviarMensaje()">Enviar</button>
@@ -269,28 +265,13 @@
     </div>
 
     <script>
-      // URL de tu API Proxy en Vercel
+      // URL de tu Proxy en Vercel
       const WEBHOOK_URL = "/api/triage";
 
-      // =========================================
-      // FUNCIÓN PARA MAXIMIZAR / RESTAURAR
-      // =========================================
+      // Función para Pantalla Completa
       function toggleMaximizar() {
         const contenedor = document.getElementById("chat-container");
-        const body = document.body;
-        const boton = document.getElementById("btn-maximizar");
-
         contenedor.classList.toggle("maximizado");
-        body.classList.toggle("maximizado-body");
-
-        // Cambiar el icono del botón
-        if (contenedor.classList.contains("maximizado")) {
-          boton.textContent = "❐"; // Icono de restaurar
-          boton.title = "Restaurar tamaño";
-        } else {
-          boton.textContent = "⛶"; // Icono de maximizar
-          boton.title = "Pantalla completa";
-        }
       }
 
       async function enviarMensaje() {
@@ -322,7 +303,8 @@
           const respuesta =
             data.respuesta || data.error || "Sin respuesta del agente";
 
-          mensajeLoading.textContent = respuesta;
+          // Actualizamos el mensaje de "cargando" con la respuesta real
+          mensajeLoading.innerHTML = formatearRespuesta(respuesta);
           mensajeLoading.classList.remove("loading");
         } catch (error) {
           mensajeLoading.textContent = "Error al conectar con el servidor.";
@@ -335,31 +317,33 @@
         }
       }
 
+      // Función para crear la burbuja
       function agregarMensaje(texto, clase) {
         const messagesDiv = document.getElementById("chat-messages");
         const nuevoMensaje = document.createElement("div");
         nuevoMensaje.className = `message ${clase}`;
 
-        if (clase.includes("bot-message")) {
-          // 1. Convertir el Markdown a HTML usando la librería
-          let htmlParseado = marked.parse(texto);
-
-          // 2. Convertir las citas [Texto] en etiquetas visuales
-          htmlParseado = htmlParseado.replace(
-            /\[(.*?)\]/g,
-            '<span class="cita-fuente">📄 $1</span>',
-          );
-
-          // 3. Inyectar el HTML en el mensaje
-          nuevoMensaje.innerHTML = htmlParseado;
+        if (clase.includes("bot-message") && !clase.includes("loading")) {
+          nuevoMensaje.innerHTML = formatearRespuesta(texto);
         } else {
-          // Los mensajes del usuario se muestran como texto plano por seguridad
           nuevoMensaje.textContent = texto;
         }
 
         messagesDiv.appendChild(nuevoMensaje);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
         return nuevoMensaje;
+      }
+
+      // Función que convierte Markdown y estiliza las citas
+      function formatearRespuesta(texto) {
+        // 1. Convertir Markdown a HTML
+        let html = marked.parse(texto);
+        // 2. Convertir [Documento] en una etiqueta visual
+        html = html.replace(
+          /\[(.*?)\]/g,
+          '<span class="cita-fuente">📄 $1</span>',
+        );
+        return html;
       }
     </script>
   </body>
