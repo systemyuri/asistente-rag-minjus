@@ -50,7 +50,6 @@
         justify-content: space-between;
         border-bottom: 2px solid var(--gris-fondo);
       }
-
       .logo-institucional {
         display: flex;
         align-items: center;
@@ -216,7 +215,6 @@
         font-weight: 700;
       }
 
-      /* ESTILO DE LA CITA CLICKEABLE */
       .cita-fuente {
         display: inline-block;
         background-color: #fdf2f2;
@@ -227,7 +225,7 @@
         border-radius: 4px;
         margin-top: 8px;
         border: 1px solid #f5c2c7;
-        cursor: pointer; /* Indica que se puede hacer clic */
+        cursor: pointer;
         transition: all 0.2s;
       }
       .cita-fuente:hover {
@@ -242,7 +240,7 @@
       }
 
       /* =========================================
-         ESTILOS DEL TOAST (NOTIFICACIÓN FLOTANTE)
+         TOAST (NOTIFICACIÓN)
          ========================================= */
       #toast-container {
         position: fixed;
@@ -253,7 +251,6 @@
         flex-direction: column;
         gap: 10px;
       }
-
       .toast {
         background: #333;
         color: white;
@@ -268,7 +265,6 @@
         border-left: 4px solid var(--rojo-minjus);
         animation: slideIn 0.3s ease-out forwards;
       }
-
       .toast-icon {
         font-size: 20px;
       }
@@ -277,7 +273,6 @@
         margin-bottom: 3px;
         font-size: 15px;
       }
-
       @keyframes slideIn {
         from {
           transform: translateX(100%);
@@ -288,7 +283,6 @@
           opacity: 1;
         }
       }
-
       @keyframes slideOut {
         from {
           transform: translateX(0);
@@ -299,12 +293,42 @@
           opacity: 0;
         }
       }
-
       .toast.hiding {
         animation: slideOut 0.3s ease-in forwards;
       }
 
-      /* ESTILOS PARA IMPRESIÓN */
+      /* =========================================
+         NUEVO: PIE DE PÁGINA DE AUDITORÍA (FOOTER)
+         ========================================= */
+      .chat-footer {
+        background: #f8f9fa;
+        padding: 8px 25px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 0.75rem;
+        color: #777;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Para que quepa en móviles */
+        gap: 10px;
+      }
+      .chat-footer span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .chat-footer .badge-ip {
+        background: #e6f0fa;
+        color: #003366;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-weight: bold;
+      }
+
+      /* =========================================
+         ESTILOS PARA IMPRESIÓN
+         ========================================= */
       @media print {
         body {
           background: white;
@@ -321,7 +345,8 @@
         .chat-input,
         .acciones-header,
         .acciones-mensaje,
-        #toast-container {
+        #toast-container,
+        .chat-footer {
           display: none !important;
         }
         .chat-messages {
@@ -341,7 +366,6 @@
     </style>
   </head>
   <body>
-    <!-- Contenedor para las notificaciones flotantes -->
     <div id="toast-container"></div>
 
     <div class="chat-container" id="chat-container">
@@ -379,6 +403,19 @@
         />
         <button id="btn-enviar" onclick="enviarMensaje()">Enviar</button>
       </div>
+
+      <!-- NUEVO: FOOTER DE AUDITORÍA -->
+      <div class="chat-footer">
+        <span title="Dirección IP pública de tu conexión"
+          >🌐 IP: <span class="badge-ip" id="footer-ip">Cargando...</span></span
+        >
+        <span title="Sistema Operativo y Navegador detectados"
+          >💻 Dispositivo: <span id="footer-so">Detectando...</span></span
+        >
+        <span title="Fecha y hora de la consulta"
+          >⏰ <span id="footer-hora"></span
+        ></span>
+      </div>
     </div>
 
     <script>
@@ -386,6 +423,56 @@
       const MENSAJE_BIENVENIDA =
         "Bienvenido al Asistente de Lineamientos del MINJUSDH.<br>¿En qué puedo ayudarte hoy?";
 
+      // =========================================
+      // INICIALIZACIÓN DEL FOOTER (IP y Dispositivo)
+      // =========================================
+      document.addEventListener("DOMContentLoaded", () => {
+        // 1. Hora local en tiempo real
+        const actualizarHora = () => {
+          const ahora = new Date();
+          document.getElementById("footer-hora").textContent =
+            ahora.toLocaleTimeString("es-PE");
+        };
+        actualizarHora();
+        setInterval(actualizarHora, 1000); // Se actualiza cada segundo
+
+        // 2. Detección del Sistema Operativo y Navegador (Real)
+        const userAgent = navigator.userAgent;
+        let dispositivo = "PC / Escritorio";
+        let navegador = "Desconocido";
+
+        if (/android/i.test(userAgent)) dispositivo = "Móvil Android";
+        else if (/iPad|iPhone|iPod/.test(userAgent))
+          dispositivo = "iOS (Apple)";
+        else if (/Windows/i.test(userAgent)) dispositivo = "Windows PC";
+        else if (/Mac/i.test(userAgent)) dispositivo = "Mac";
+        else if (/Linux/i.test(userAgent)) dispositivo = "Linux";
+
+        if (userAgent.includes("Chrome")) navegador = "Chrome";
+        else if (userAgent.includes("Firefox")) navegador = "Firefox";
+        else if (userAgent.includes("Safari") && !userAgent.includes("Chrome"))
+          navegador = "Safari";
+        else if (userAgent.includes("Edge")) navegador = "Edge";
+
+        document.getElementById("footer-so").textContent =
+          `${dispositivo} (${navegador})`;
+
+        // 3. Obtener la IP PÚBLICA REAL usando una API gratuita
+        fetch("https://api.ipify.org?format=json")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("footer-ip").textContent = data.ip;
+          })
+          .catch(() => {
+            // Si falla la red, simulamos una IP institucional (Plan B)
+            document.getElementById("footer-ip").textContent =
+              "192.168.1.100 (Local)";
+          });
+      });
+
+      // =========================================
+      // RESTO DE FUNCIONES (Chat, Copiar, Imprimir)
+      // =========================================
       window.onload = function () {
         reiniciarChat();
       };
@@ -470,7 +557,6 @@
         return nuevoMensaje;
       }
 
-      // Agregamos un "title" para que el usuario sepa que puede hacer clic
       function formatearRespuesta(texto) {
         let html = marked.parse(texto);
         html = html.replace(
@@ -494,7 +580,6 @@
         const btnImprimir = contenedorMensaje.querySelector(".btn-imprimir");
         const citas = contenedorMensaje.querySelectorAll(".cita-fuente");
 
-        // Evento para Copiar
         if (btnCopiar) {
           btnCopiar.onclick = () => {
             const textoParaCopiar = contenedorMensaje.innerText
@@ -511,7 +596,6 @@
           };
         }
 
-        // Evento para Imprimir
         if (btnImprimir) {
           btnImprimir.onclick = () => {
             const ventanaImpresion = window.open(
@@ -543,7 +627,6 @@
           };
         }
 
-        // NUEVO EVENTO: Clic en las Citas (Descarga simulada)
         citas.forEach((cita) => {
           cita.onclick = () => {
             const nombreDocumento = cita.innerText.replace("📄 ", "").trim();
@@ -552,14 +635,10 @@
         });
       }
 
-      // =========================================
-      // FUNCIÓN PARA MOSTRAR EL TOAST (NOTIFICACIÓN)
-      // =========================================
       function mostrarToast(nombreDocumento) {
         const container = document.getElementById("toast-container");
         const toast = document.createElement("div");
         toast.className = "toast";
-
         toast.innerHTML = `
           <div class="toast-icon">🚧</div>
           <div class="toast-content">
@@ -567,10 +646,7 @@
             <span>El documento "<b>${nombreDocumento}</b>" estará disponible para descarga en la próxima versión del sistema.</span>
           </div>
         `;
-
         container.appendChild(toast);
-
-        // Auto-eliminar después de 4 segundos
         setTimeout(() => {
           toast.classList.add("hiding");
           setTimeout(() => toast.remove(), 300);
