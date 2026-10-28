@@ -8,9 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-      /* =========================================
-         1. ESTILOS INSTITUCIONALES (MINJUSDH)
-         ========================================= */
       :root {
         --rojo-minjus: #c8102e;
         --gris-fondo: #f2f2f2;
@@ -44,9 +41,7 @@
         height: 100vh;
       }
 
-      /* =========================================
-         2. CABECERA Y BOTONES
-         ========================================= */
+      /* CABECERA */
       .chat-header {
         background: white;
         padding: 15px 25px;
@@ -61,7 +56,6 @@
         align-items: center;
         gap: 15px;
       }
-
       .logo-escudo {
         width: 45px;
         height: 45px;
@@ -74,7 +68,6 @@
         font-weight: bold;
         font-size: 10px;
       }
-
       .titulo-principal {
         color: var(--rojo-minjus);
         font-size: 1.4rem;
@@ -82,12 +75,10 @@
         margin: 0;
         text-transform: uppercase;
       }
-
       .acciones-header {
         display: flex;
         gap: 10px;
       }
-
       .btn-header {
         background: transparent;
         border: 1px solid var(--rojo-minjus);
@@ -102,15 +93,12 @@
         align-items: center;
         gap: 5px;
       }
-
       .btn-header:hover {
         background: var(--rojo-minjus);
         color: white;
       }
 
-      /* =========================================
-         3. ÁREA DE MENSAJES
-         ========================================= */
+      /* MENSAJES */
       .chat-messages {
         flex: 1;
         padding: 25px;
@@ -120,7 +108,6 @@
         gap: 15px;
         background-color: #fafafa;
       }
-
       .message {
         padding: 15px 20px;
         border-radius: 8px;
@@ -128,9 +115,8 @@
         line-height: 1.6;
         font-size: 15px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        position: relative; /* Para posicionar los botones de acción */
+        position: relative;
       }
-
       .bot-message {
         background: white;
         color: var(--gris-texto);
@@ -138,22 +124,18 @@
         border: 1px solid #e0e0e0;
         border-left: 4px solid var(--rojo-minjus);
       }
-
       .user-message {
         background: var(--rojo-minjus);
         color: white;
         align-self: flex-end;
         border-bottom-right-radius: 0;
       }
-
       .loading {
         color: #888;
         font-style: italic;
       }
 
-      /* =========================================
-         4. NUEVOS BOTONES DE ACCIÓN (Copiar/Imprimir)
-         ========================================= */
+      /* BOTONES DE ACCIÓN */
       .acciones-mensaje {
         display: flex;
         gap: 10px;
@@ -161,7 +143,6 @@
         padding-top: 10px;
         border-top: 1px dashed #e0e0e0;
       }
-
       .btn-accion {
         background: transparent;
         border: none;
@@ -175,22 +156,18 @@
         border-radius: 4px;
         transition: all 0.2s;
       }
-
       .btn-accion:hover {
         background: #f0f0f0;
         color: var(--rojo-minjus);
       }
 
-      /* =========================================
-         5. ÁREA DE ENTRADA (Input)
-         ========================================= */
+      /* INPUT */
       .chat-input {
         display: flex;
         padding: 20px;
         border-top: 1px solid #ddd;
         background: white;
       }
-
       .chat-input input {
         flex: 1;
         padding: 12px 15px;
@@ -200,11 +177,9 @@
         font-size: 15px;
         transition: border 0.2s;
       }
-
       .chat-input input:focus {
         border-color: var(--rojo-minjus);
       }
-
       .chat-input button {
         padding: 12px 25px;
         background: var(--rojo-minjus);
@@ -217,14 +192,11 @@
         font-size: 15px;
         transition: background 0.2s;
       }
-
       .chat-input button:hover {
         background: #a00d25;
       }
 
-      /* =========================================
-         6. FORMATO DE TEXTO (Markdown y Citas)
-         ========================================= */
+      /* MARKDOWN Y CITAS */
       .bot-message p {
         margin: 0 0 10px 0;
       }
@@ -244,6 +216,7 @@
         font-weight: 700;
       }
 
+      /* ESTILO DE LA CITA CLICKEABLE */
       .cita-fuente {
         display: inline-block;
         background-color: #fdf2f2;
@@ -254,16 +227,84 @@
         border-radius: 4px;
         margin-top: 8px;
         border: 1px solid #f5c2c7;
+        cursor: pointer; /* Indica que se puede hacer clic */
+        transition: all 0.2s;
+      }
+      .cita-fuente:hover {
+        background-color: var(--rojo-minjus);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(200, 16, 46, 0.3);
       }
 
-      /* Ocultar botones de acción en el mensaje de bienvenida o carga */
       .bot-message.loading .acciones-mensaje {
         display: none;
       }
 
       /* =========================================
-         7. ESTILOS PARA IMPRESIÓN (Opcional)
+         ESTILOS DEL TOAST (NOTIFICACIÓN FLOTANTE)
          ========================================= */
+      #toast-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .toast {
+        background: #333;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        min-width: 300px;
+        border-left: 4px solid var(--rojo-minjus);
+        animation: slideIn 0.3s ease-out forwards;
+      }
+
+      .toast-icon {
+        font-size: 20px;
+      }
+      .toast-content strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 15px;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+
+      .toast.hiding {
+        animation: slideOut 0.3s ease-in forwards;
+      }
+
+      /* ESTILOS PARA IMPRESIÓN */
       @media print {
         body {
           background: white;
@@ -279,7 +320,8 @@
         .chat-header,
         .chat-input,
         .acciones-header,
-        .acciones-mensaje {
+        .acciones-mensaje,
+        #toast-container {
           display: none !important;
         }
         .chat-messages {
@@ -292,18 +334,22 @@
           border: 1px solid #ddd;
           page-break-inside: avoid;
         }
+        .cita-fuente {
+          border: 1px solid #ccc;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Contenedor para las notificaciones flotantes -->
+    <div id="toast-container"></div>
+
     <div class="chat-container" id="chat-container">
-      <!-- CABECERA CON BOTONES -->
       <div class="chat-header">
         <div class="logo-institucional">
           <div class="logo-escudo">PERÚ</div>
           <h1 class="titulo-principal">Asistente Virtual de Lineamientos</h1>
         </div>
-
         <div class="acciones-header">
           <button
             class="btn-header"
@@ -322,10 +368,8 @@
         </div>
       </div>
 
-      <!-- ÁREA DE MENSAJES -->
       <div class="chat-messages" id="chat-messages"></div>
 
-      <!-- ÁREA DE ENTRADA -->
       <div class="chat-input">
         <input
           type="text"
@@ -392,12 +436,10 @@
           const respuesta =
             data.respuesta || data.error || "Sin respuesta del agente";
 
-          // Formateamos el HTML y añadimos los botones de acción
           mensajeLoading.innerHTML =
             formatearRespuesta(respuesta) + generarBotonesAccion();
           mensajeLoading.classList.remove("loading");
 
-          // Asignamos los eventos a los nuevos botones
           asignarEventosBotones(mensajeLoading);
         } catch (error) {
           mensajeLoading.textContent = "Error al conectar con el servidor.";
@@ -428,20 +470,16 @@
         return nuevoMensaje;
       }
 
+      // Agregamos un "title" para que el usuario sepa que puede hacer clic
       function formatearRespuesta(texto) {
         let html = marked.parse(texto);
         html = html.replace(
           /\[(.*?)\]/g,
-          '<span class="cita-fuente">📄 $1</span>',
+          '<span class="cita-fuente" title="Haz clic para descargar el documento">📄 $1</span>',
         );
         return html;
       }
 
-      // =========================================
-      // NUEVAS FUNCIONES: COPIAR E IMPRIMIR
-      // =========================================
-
-      // Genera el HTML de los botones
       function generarBotonesAccion() {
         return `
           <div class="acciones-mensaje">
@@ -451,14 +489,14 @@
         `;
       }
 
-      // Asigna los eventos a los botones recién creados
       function asignarEventosBotones(contenedorMensaje) {
         const btnCopiar = contenedorMensaje.querySelector(".btn-copiar");
         const btnImprimir = contenedorMensaje.querySelector(".btn-imprimir");
+        const citas = contenedorMensaje.querySelectorAll(".cita-fuente");
 
+        // Evento para Copiar
         if (btnCopiar) {
           btnCopiar.onclick = () => {
-            // Extraemos solo el texto (sin los botones) para copiar
             const textoParaCopiar = contenedorMensaje.innerText
               .replace("📋 Copiar respuesta", "")
               .replace("🖨️ Imprimir", "")
@@ -473,9 +511,9 @@
           };
         }
 
+        // Evento para Imprimir
         if (btnImprimir) {
           btnImprimir.onclick = () => {
-            // Al imprimir, solo mostramos el mensaje seleccionado
             const ventanaImpresion = window.open(
               "",
               "",
@@ -484,7 +522,6 @@
             ventanaImpresion.document.write(
               "<html><head><title>Imprimir Respuesta - MINJUSDH</title>",
             );
-            // Copiamos los estilos para que se vea bonito
             ventanaImpresion.document.write(
               "<style>body { font-family: Arial, sans-serif; padding: 20px; } .cita-fuente { background: #fdf2f2; color: #C8102E; padding: 3px 8px; border-radius: 4px; font-weight: bold; } strong { color: #C8102E; }</style>",
             );
@@ -497,7 +534,7 @@
                 /<div class="acciones-mensaje">.*?<\/div>/s,
                 "",
               ),
-            ); // Quitamos los botones
+            );
             ventanaImpresion.document.write("</body></html>");
             ventanaImpresion.document.close();
             ventanaImpresion.focus();
@@ -505,6 +542,39 @@
             ventanaImpresion.close();
           };
         }
+
+        // NUEVO EVENTO: Clic en las Citas (Descarga simulada)
+        citas.forEach((cita) => {
+          cita.onclick = () => {
+            const nombreDocumento = cita.innerText.replace("📄 ", "").trim();
+            mostrarToast(nombreDocumento);
+          };
+        });
+      }
+
+      // =========================================
+      // FUNCIÓN PARA MOSTRAR EL TOAST (NOTIFICACIÓN)
+      // =========================================
+      function mostrarToast(nombreDocumento) {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+
+        toast.innerHTML = `
+          <div class="toast-icon">🚧</div>
+          <div class="toast-content">
+            <strong>Descarga en construcción</strong>
+            <span>El documento "<b>${nombreDocumento}</b>" estará disponible para descarga en la próxima versión del sistema.</span>
+          </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto-eliminar después de 4 segundos
+        setTimeout(() => {
+          toast.classList.add("hiding");
+          setTimeout(() => toast.remove(), 300);
+        }, 4000);
       }
     </script>
   </body>
