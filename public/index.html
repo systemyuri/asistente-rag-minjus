@@ -197,7 +197,44 @@
         margin-top: 8px;
         border-left: 3px solid #003366;
       }
+
+      /* --- ESTILOS PARA EL FORMATO MARKDOWN --- */
+      .bot-message {
+        line-height: 1.6;
+      }
+      .bot-message p {
+        margin: 0 0 10px 0;
+      }
+      .bot-message p:last-child {
+        margin-bottom: 0;
+      }
+      .bot-message ul,
+      .bot-message ol {
+        margin: 8px 0 12px 20px; /* Sangría para listas */
+        padding: 0;
+      }
+      .bot-message li {
+        margin-bottom: 6px;
+      }
+      .bot-message strong {
+        color: #003366; /* Resalta las negritas en azul */
+        font-weight: 700;
+      }
+
+      /* Estilo para las citas [Documento] */
+      .cita-fuente {
+        display: inline-block;
+        background-color: #e6f0fa;
+        color: #003366;
+        font-size: 0.85em;
+        font-weight: bold;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-top: 8px;
+        border-left: 3px solid #003366;
+      }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
     <div class="chat-container" id="chat-container">
@@ -304,17 +341,16 @@
         nuevoMensaje.className = `message ${clase}`;
 
         if (clase.includes("bot-message")) {
-          // 1. Convertir Markdown a HTML
+          // 1. Convertir el Markdown a HTML usando la librería
           let htmlParseado = marked.parse(texto);
 
-          // 2. Convertir las citas [Texto] en etiquetas visuales (Badges)
-          // Busca cualquier cosa entre corchetes y le añade la clase CSS
+          // 2. Convertir las citas [Texto] en etiquetas visuales
           htmlParseado = htmlParseado.replace(
             /\[(.*?)\]/g,
             '<span class="cita-fuente">📄 $1</span>',
           );
 
-          // 3. Inyectar el HTML
+          // 3. Inyectar el HTML en el mensaje
           nuevoMensaje.innerHTML = htmlParseado;
         } else {
           // Los mensajes del usuario se muestran como texto plano por seguridad
