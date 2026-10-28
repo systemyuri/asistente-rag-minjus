@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Asistente RAG - MINJUSDH</title>
 
-    <!-- Librería para dar formato bonito al texto (Markdown) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
@@ -84,7 +83,6 @@
         text-transform: uppercase;
       }
 
-      /* Contenedor de botones de acción (Reiniciar y Maximizar) */
       .acciones-header {
         display: flex;
         gap: 10px;
@@ -130,6 +128,7 @@
         line-height: 1.6;
         font-size: 15px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: relative; /* Para posicionar los botones de acción */
       }
 
       .bot-message {
@@ -153,7 +152,37 @@
       }
 
       /* =========================================
-         4. ÁREA DE ENTRADA (Input)
+         4. NUEVOS BOTONES DE ACCIÓN (Copiar/Imprimir)
+         ========================================= */
+      .acciones-mensaje {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px dashed #e0e0e0;
+      }
+
+      .btn-accion {
+        background: transparent;
+        border: none;
+        color: #888;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .btn-accion:hover {
+        background: #f0f0f0;
+        color: var(--rojo-minjus);
+      }
+
+      /* =========================================
+         5. ÁREA DE ENTRADA (Input)
          ========================================= */
       .chat-input {
         display: flex;
@@ -194,7 +223,7 @@
       }
 
       /* =========================================
-         5. FORMATO DE TEXTO (Markdown y Citas)
+         6. FORMATO DE TEXTO (Markdown y Citas)
          ========================================= */
       .bot-message p {
         margin: 0 0 10px 0;
@@ -226,6 +255,44 @@
         margin-top: 8px;
         border: 1px solid #f5c2c7;
       }
+
+      /* Ocultar botones de acción en el mensaje de bienvenida o carga */
+      .bot-message.loading .acciones-mensaje {
+        display: none;
+      }
+
+      /* =========================================
+         7. ESTILOS PARA IMPRESIÓN (Opcional)
+         ========================================= */
+      @media print {
+        body {
+          background: white;
+          display: block;
+          height: auto;
+        }
+        .chat-container {
+          box-shadow: none;
+          border: none;
+          height: auto;
+          max-width: 100%;
+        }
+        .chat-header,
+        .chat-input,
+        .acciones-header,
+        .acciones-mensaje {
+          display: none !important;
+        }
+        .chat-messages {
+          padding: 0;
+          background: white;
+          overflow: visible;
+        }
+        .message {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          page-break-inside: avoid;
+        }
+      }
     </style>
   </head>
   <body>
@@ -238,7 +305,6 @@
         </div>
 
         <div class="acciones-header">
-          <!-- NUEVO BOTÓN DE REINICIAR -->
           <button
             class="btn-header"
             onclick="reiniciarChat()"
@@ -246,7 +312,6 @@
           >
             ↻ Reiniciar
           </button>
-          <!-- BOTÓN DE MAXIMIZAR -->
           <button
             class="btn-header"
             onclick="toggleMaximizar()"
@@ -258,9 +323,7 @@
       </div>
 
       <!-- ÁREA DE MENSAJES -->
-      <div class="chat-messages" id="chat-messages">
-        <!-- El saludo inicial se genera desde JS para poder reiniciarlo fácilmente -->
-      </div>
+      <div class="chat-messages" id="chat-messages"></div>
 
       <!-- ÁREA DE ENTRADA -->
       <div class="chat-input">
@@ -279,44 +342,27 @@
       const MENSAJE_BIENVENIDA =
         "Bienvenido al Asistente de Lineamientos del MINJUSDH.<br>¿En qué puedo ayudarte hoy?";
 
-      // =========================================
-      // INICIALIZAR CHAT (Al cargar la página)
-      // =========================================
       window.onload = function () {
         reiniciarChat();
       };
 
-      // =========================================
-      // FUNCIÓN PARA REINICIAR EL CHAT
-      // =========================================
       function reiniciarChat() {
         const messagesDiv = document.getElementById("chat-messages");
-        // Limpiar todos los mensajes
         messagesDiv.innerHTML = "";
-
-        // Volver a poner el mensaje de bienvenida
         const bienvenida = document.createElement("div");
         bienvenida.className = "message bot-message";
         bienvenida.innerHTML = MENSAJE_BIENVENIDA;
         messagesDiv.appendChild(bienvenida);
-
-        // Limpiar el input y darle foco
         const input = document.getElementById("user-input");
         input.value = "";
         input.focus();
       }
 
-      // =========================================
-      // FUNCIÓN PARA MAXIMIZAR
-      // =========================================
       function toggleMaximizar() {
         const contenedor = document.getElementById("chat-container");
         contenedor.classList.toggle("maximizado");
       }
 
-      // =========================================
-      // FUNCIÓN PARA ENVIAR MENSAJE
-      // =========================================
       async function enviarMensaje() {
         const input = document.getElementById("user-input");
         const boton = document.getElementById("btn-enviar");
@@ -346,8 +392,13 @@
           const respuesta =
             data.respuesta || data.error || "Sin respuesta del agente";
 
-          mensajeLoading.innerHTML = formatearRespuesta(respuesta);
+          // Formateamos el HTML y añadimos los botones de acción
+          mensajeLoading.innerHTML =
+            formatearRespuesta(respuesta) + generarBotonesAccion();
           mensajeLoading.classList.remove("loading");
+
+          // Asignamos los eventos a los nuevos botones
+          asignarEventosBotones(mensajeLoading);
         } catch (error) {
           mensajeLoading.textContent = "Error al conectar con el servidor.";
           mensajeLoading.classList.remove("loading");
@@ -359,16 +410,15 @@
         }
       }
 
-      // =========================================
-      // FUNCIONES DE UTILIDAD (Burbujas y Formato)
-      // =========================================
       function agregarMensaje(texto, clase) {
         const messagesDiv = document.getElementById("chat-messages");
         const nuevoMensaje = document.createElement("div");
         nuevoMensaje.className = `message ${clase}`;
 
         if (clase.includes("bot-message") && !clase.includes("loading")) {
-          nuevoMensaje.innerHTML = formatearRespuesta(texto);
+          nuevoMensaje.innerHTML =
+            formatearRespuesta(texto) + generarBotonesAccion();
+          asignarEventosBotones(nuevoMensaje);
         } else {
           nuevoMensaje.textContent = texto;
         }
@@ -385,6 +435,76 @@
           '<span class="cita-fuente">📄 $1</span>',
         );
         return html;
+      }
+
+      // =========================================
+      // NUEVAS FUNCIONES: COPIAR E IMPRIMIR
+      // =========================================
+
+      // Genera el HTML de los botones
+      function generarBotonesAccion() {
+        return `
+          <div class="acciones-mensaje">
+            <button class="btn-accion btn-copiar">📋 Copiar respuesta</button>
+            <button class="btn-accion btn-imprimir">🖨️ Imprimir</button>
+          </div>
+        `;
+      }
+
+      // Asigna los eventos a los botones recién creados
+      function asignarEventosBotones(contenedorMensaje) {
+        const btnCopiar = contenedorMensaje.querySelector(".btn-copiar");
+        const btnImprimir = contenedorMensaje.querySelector(".btn-imprimir");
+
+        if (btnCopiar) {
+          btnCopiar.onclick = () => {
+            // Extraemos solo el texto (sin los botones) para copiar
+            const textoParaCopiar = contenedorMensaje.innerText
+              .replace("📋 Copiar respuesta", "")
+              .replace("🖨️ Imprimir", "")
+              .trim();
+            navigator.clipboard.writeText(textoParaCopiar).then(() => {
+              btnCopiar.textContent = "✅ ¡Copiado!";
+              setTimeout(
+                () => (btnCopiar.textContent = "📋 Copiar respuesta"),
+                2000,
+              );
+            });
+          };
+        }
+
+        if (btnImprimir) {
+          btnImprimir.onclick = () => {
+            // Al imprimir, solo mostramos el mensaje seleccionado
+            const ventanaImpresion = window.open(
+              "",
+              "",
+              "height=600,width=800",
+            );
+            ventanaImpresion.document.write(
+              "<html><head><title>Imprimir Respuesta - MINJUSDH</title>",
+            );
+            // Copiamos los estilos para que se vea bonito
+            ventanaImpresion.document.write(
+              "<style>body { font-family: Arial, sans-serif; padding: 20px; } .cita-fuente { background: #fdf2f2; color: #C8102E; padding: 3px 8px; border-radius: 4px; font-weight: bold; } strong { color: #C8102E; }</style>",
+            );
+            ventanaImpresion.document.write("</head><body>");
+            ventanaImpresion.document.write(
+              "<h2>Asistente Virtual de Lineamientos - MINJUSDH</h2>",
+            );
+            ventanaImpresion.document.write(
+              contenedorMensaje.innerHTML.replace(
+                /<div class="acciones-mensaje">.*?<\/div>/s,
+                "",
+              ),
+            ); // Quitamos los botones
+            ventanaImpresion.document.write("</body></html>");
+            ventanaImpresion.document.close();
+            ventanaImpresion.focus();
+            ventanaImpresion.print();
+            ventanaImpresion.close();
+          };
+        }
       }
     </script>
   </body>
